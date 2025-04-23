@@ -15,7 +15,7 @@ export const signup = async(req,res)=>{
         }
         const user = await User.findOne({email})
         if(user) return res.status(400).json({message:"User already exists"})
-        const salt = await bcrypt.getSalt(10)
+        const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password,salt)
         
         const newUser= new User({
@@ -43,8 +43,29 @@ export const signup = async(req,res)=>{
     }
 }
 
-export const login = (req,res)=>{
-    res.send('login route')
+export const login = async(req,res)=>{
+    const {email,password} = req.body
+    try {
+        const user = await User.findOne({email})
+        if(!user){
+            return res.status(400).json({message:"Invalid credentials"})
+        }
+        //password is from the request body and user.password is the hashed password from the database
+        const isPasswordCorrect = await bcrypt.compare(password,user.password)//compare the password with the hashed password
+        if(!isPasswordCorrect){
+            return res.status(400).json({message: "Invalid Credential"})
+        }
+        generateToken(user._id,res)
+        res.status(200).json({
+            _id: newUser._id,
+                fullName: newUser.fullName,
+                email: newUser.email,
+                profilePic: newUser.profilePic
+        })
+    } catch (error) {
+        console.log("Error in login controller", error.message);
+        res.status(500).json({message: "Invalid credentials"})
+    }
 }
 
 export const logout = (req,res)=>{
