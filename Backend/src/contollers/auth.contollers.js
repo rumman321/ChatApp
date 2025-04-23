@@ -57,10 +57,10 @@ export const login = async(req,res)=>{
         }
         generateToken(user._id,res)
         res.status(200).json({
-            _id: newUser._id,
-                fullName: newUser.fullName,
-                email: newUser.email,
-                profilePic: newUser.profilePic
+            _id: user._id,
+                fullName: user.fullName,
+                email: user.email,
+                profilePic: user.profilePic
         })
     } catch (error) {
         console.log("Error in login controller", error.message);
@@ -69,5 +69,12 @@ export const login = async(req,res)=>{
 }
 
 export const logout = (req,res)=>{
-    res.send('logout route')
+    
+    try {
+        res.cookie("token","",{maxAge:0})
+    res.status(200).json({message:"Logout successfully"})
+    } catch (error) {
+        console.log("Error in Logout controller",error.message);
+        res.status(500).json({message:"Internal server error"})
+    }
 }
